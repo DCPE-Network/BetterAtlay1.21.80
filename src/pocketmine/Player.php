@@ -841,11 +841,15 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 	 * @throws InvalidStateException if the player is closed
 	 */
 	public function hasPermission($name) : bool{
-		if($this->closed){
-			throw new InvalidStateException("Trying to get permissions of closed player");
-		}
-		return $this->perm->hasPermission($name);
-	}
+    if($this->closed){
+        throw new InvalidStateException("Trying to get permissions of closed player");
+    }
+    if ($this->perm === null) {
+        return false; // prevent crash if perm isn't ready
+    }
+    return $this->perm->hasPermission($name);
+}
+
 
 	public function addAttachment(Plugin $plugin, string $name = null, bool $value = null) : PermissionAttachment{
 		return $this->perm->addAttachment($plugin, $name, $value);
