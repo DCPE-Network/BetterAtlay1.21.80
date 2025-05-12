@@ -132,16 +132,16 @@ class BatchPacket extends DataPacket{
 	 * @phpstan-return Generator<int, string, void, void>
 	 */
 	public function getPackets(){
-		$stream = new NetworkBinaryStream($this->payload);
-		$count = 0;
-		while(!$stream->feof()){
-			if($count++ >= 500){
-				throw new UnexpectedValueException("Too many packets in a single batch");
-			}
-			yield $stream->getString();
+	$stream = new NetworkBinaryStream($this->payload);
+	$count = 0;
+	while(!$stream->feof()){
+		if($count++ >= 500){
+			// silently stop to prevent lag from too many packets
+			break;
 		}
+		yield $stream->getString();
 	}
-
+}
 	public function getCompressionLevel() : int{
 		return $this->compressionLevel;
 	}
