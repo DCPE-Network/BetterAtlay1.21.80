@@ -153,21 +153,43 @@ class BatchPacket extends DataPacket{
 		$this->compressionLevel = $level;
 	}
 
-	public function handle(NetworkSession $session) : bool{
-		if($this->payload === ""){
-			return false;
+	public function handle(NetworkSession $session) : bool {
+	if($this->payload === ""){
+		return false;
+	}
+
+	$packetCount = 0;
+
+	foreach($this->getPackets() as $buf){
+		$packetCount++;
+
+		// Stop processing after too many packets (silent exit to avoid crash)
+		if($packetCount > 500){
+			break;
 		}
 
-		foreach($this->getPackets() as $buf){
+		// Drop empty or very large packets (possible abuse)
+		$length = strlen($buf);
+		if($length === 0 || $length > 65535){
+			continue;
+		}
+
+		// Try parsing the packet
+		try {
 			$pk = PacketPool::getPacket($buf);
 
+			// Don't allow certain packet types in batch
 			if(!$pk->canBeBatched()){
-				throw new UnexpectedValueException("Received invalid " . get_class($pk) . " inside BatchPacket");
+				continue;
 			}
 
 			$session->handleDataPacket($pk);
+		} catch(\Throwable $e){
+			// Skip broken packets instead of crashing
+			continue;
 		}
-
-		return true;
 	}
+
+	return true;
+}
 }
