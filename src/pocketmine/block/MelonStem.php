@@ -42,7 +42,7 @@ class MelonStem extends Crops{
 	}
 
 	public function onRandomTick() : void{
-		if(mt_rand(0, 19) === 1){
+		if(mt_rand(0, 3) === 1){ #revert babadao
 			if($this->meta < 0x07){
 				$block = clone $this;
 				++$block->meta;
