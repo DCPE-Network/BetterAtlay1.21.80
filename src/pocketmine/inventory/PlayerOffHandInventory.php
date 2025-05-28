@@ -75,23 +75,33 @@ class PlayerOffHandInventory extends BaseInventory{
 			$target = [$target];
 		}
 
-		$pk = new MobEquipmentPacket();
-		$pk->entityRuntimeId = $this->getHolder()->getId();
-		$pk->item = ItemStackWrapper::legacy($this->getItem(0));
-		$pk->inventorySlot = $pk->hotbarSlot = 0;
-		$pk->windowId = ContainerIds::OFFHAND;
-		$pk->encode();
-
 		foreach($target as $player){
 			if($player === $this->getHolder()){
-				$player->sendDataPacket($pk);
+				$air = ItemStackWrapper::legacy(Item::get(Item::AIR));
+				$pk2 = new InventoryContentPacket();
+				$pk2->windowId = $player->getWindowId($this);
+				$pk2->items = [$air];
+				$player->sendDataPacket($pk2);
 
 				$pk2 = new InventoryContentPacket();
 				$pk2->windowId = $player->getWindowId($this);
 				$pk2->items = array_map([ItemStackWrapper::class, 'legacy'], $this->getContents(true));
-
 				$player->sendDataPacket($pk2);
+
+				$pk = new MobEquipmentPacket();
+				$pk->entityRuntimeId = $this->getHolder()->getId();
+				$pk->item = ItemStackWrapper::legacy($this->getItem(0));
+				$pk->inventorySlot = $pk->hotbarSlot = 0;
+				$pk->windowId = ContainerIds::OFFHAND;
+				$pk->encode();
+				$player->sendDataPacket($pk);
 			}else{
+				$pk = new MobEquipmentPacket();
+				$pk->entityRuntimeId = $this->getHolder()->getId();
+				$pk->item = ItemStackWrapper::legacy($this->getItem(0));
+				$pk->inventorySlot = $pk->hotbarSlot = 0;
+				$pk->windowId = ContainerIds::OFFHAND;
+				$pk->encode();
 				$player->sendDataPacket($pk);
 			}
 		}
