@@ -4934,8 +4934,6 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					}
 				}
 
-				$this->setUsingItem(true);
-
 				return true;
 			default:
 				//unknown
