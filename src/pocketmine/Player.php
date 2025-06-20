@@ -3227,6 +3227,27 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 							return true;
 						}
 						break;
+					case ReleaseItemTransactionData::ACTION_CONSUME:
+						$item = $this->inventory->getItemInHand();
+						if($item instanceof \pocketmine\item\Consumable && (!($item instanceof \pocketmine\item\MaybeConsumable) || $item->canBeConsumed())){
+							$ev = new \pocketmine\event\player\PlayerItemConsumeEvent($this, $item);
+							if($this->hasItemCooldown($item)){
+								$ev->setCancelled();
+							}
+							$ev->call();
+							if(!$ev->isCancelled() && $this->consumeObject($item)){
+								$this->resetItemCooldown($item);
+								if($this->isSurvival()){
+									$item->pop();
+									$this->inventory->setItemInHand($item);
+									$this->inventory->addItem($item->getResidue());
+								}
+							}
+							$this->setUsingItem(false);
+							$this->inventory->sendContents($this);
+							return true;
+						}
+						break;
 					default:
 						break;
 				}
