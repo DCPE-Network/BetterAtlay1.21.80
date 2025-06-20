@@ -4928,6 +4928,10 @@ class Player extends Human implements CommandSender, ChunkLoader, IPlayer{
 					if($this->isSurvival()){
 						$this->inventory->setItemInHand($item);
 					}
+					// Only set using item if it's a consumable and can be consumed
+					if($item instanceof Consumable && (!($item instanceof MaybeConsumable) || $item->canBeConsumed())){
+						$this->setUsingItem(true);
+					}
 				}
 
 				$this->setUsingItem(true);
